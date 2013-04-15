@@ -23,7 +23,7 @@ Currently, the easiest way is to download the file directly from bitbucket.org:
     sudo wget -O /usr/bin/shotwell-export https://bitbucket.org/robertkoehler/shotwell-export/raw/tip/shotwell-export.py
     sudo chmod a+x /usr/bin/shotwell-export
 
-If you want better date support, download this EXIF library:
+If you want better date support, download this EXIF library. This is optional.
 
     sudo wget -O /usr/bin/EXIF.py https://raw.github.com/ianare/exif-py/master/EXIF.py
 
@@ -50,12 +50,15 @@ Now, you can invoke the help:
                             /media/OldDrive/ /media/NewDrive/
     
     For more information, see http://bitbucket.org/robertkoehler/shotwell-export/
-    
 
 
 By default, `shotwell-export` will load the photo database of the local user and copy all files known to shotwell into the directory `shotwell-export`.
 
-You can customize the behaviour by adding switches documented in the next section.
+To extract all photos from a backup location, this command would be a good choice:
+
+    shotwell-export --db /media/Drive/Backups/Shotwell/data/photo.db --replace /home/user/Photos/ /media/Drive/Backups/Shotwell/ --stars
+
+Some extra switches are documented in the next section.
 
 Command Line
 ------------
@@ -68,7 +71,7 @@ Some arguments explained.
 
 ### Broken paths in photo.db
 
-Sometimes, you had to move the pictures from one drive to another and shotwell does not find its photos anymore. Let `shotwell-export` know the new location:
+Sometimes, you had to move the pictures from one drive to another and shotwell does not find its photos anymore. Apply this argument if a lot of `NOT FOUND:` messages pop up. You can let `shotwell-export` know the new location:
 
 `--replace /media/MyOldDrive/Photos/ /media/NewDrive/Media/Photos/`
 
