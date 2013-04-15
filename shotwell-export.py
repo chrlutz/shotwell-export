@@ -127,13 +127,13 @@ for row in cur:
 	
 		targetFile = targetFile.replace('/ ', '/').replace(' /', '/')
 		targetDir = os.path.dirname(targetFile)
-	
-		if not os.path.exists(targetDir):
-			os.makedirs(targetDir)
-	
+		
 		if not os.path.exists(sourceFile):
 			sys.stderr.write(u'NOT FOUND: %s\r\n' % sourceFile)
 		else:
+			if not os.path.exists(targetDir):
+				os.makedirs(targetDir)
+
 			print(targetFile)
 			if not os.path.exists(targetFile):
 				if args.move:
