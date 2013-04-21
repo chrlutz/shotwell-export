@@ -34,7 +34,7 @@ try:
 	import EXIF
 	haveEXIF = True
 except ImportError:
-   	pass
+   	sys.stderr.write('Please note: Extended EXIF support not available.\r\n')
 
 def getEXIFDate(filename):
 	if haveEXIF:
@@ -58,11 +58,11 @@ parser = argparse.ArgumentParser(
 	description='Exports all Shotwell photos and videos into a directory structure.',
 	epilog='For more information, see http://bitbucket.org/robertkoehler/shotwell-export/')
 parser.add_argument('-d', '--db', default='~/.local/share/shotwell/data/photo.db', help='location of photo.db, defaults to local user\'s')
-parser.add_argument('-o', '--output-dir', default='shotwell-export', help='output location, defaults to shotwell-export')
-parser.add_argument('-n', '--filename', default='{y}/{y}-{m}-{d} {event}/{file}', help='template for file path, defaults to {y}/{y}-{m}-{d} {event}/{file}')
+parser.add_argument('-o', '--output-dir', default='shotwell-export', metavar='DIR', help='output location, defaults to shotwell-export')
+parser.add_argument('-n', '--filename', default='{y}/{y}-{m}-{d} {event}/{file}', metavar='PATTERN', help='template for file path, defaults to {y}/{y}-{m}-{d} {event}/{file}')
 parser.add_argument('-m', '--move', action='store_true', help='move files instead of copying. CONSIDER A BACKUP')
 parser.add_argument('-s', '--stars', action='store_true', help='add ratings: IMG_1234 +++.JPG')
-parser.add_argument('-r', '--replace', nargs=2, help='replace source path parts, try --replace /media/OldDrive/ /media/NewDrive/')
+parser.add_argument('-r', '--replace', nargs=2, metavar=('SEARCH', 'REPLACE'), help='replace source path parts, try --replace /media/OldDrive/ /media/NewDrive/')
 
 args = parser.parse_args()
 
