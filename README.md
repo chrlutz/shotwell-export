@@ -77,7 +77,7 @@ Sometimes, you had to move the pictures from one drive to another and shotwell d
 
 ### Keep the rating
 
-You can have the rating appended as a sequence of plussed appended to the original filename. Rating `-1` to `5` will become `+` to `+++++`. 
+You can have the rating appended as a sequence of plusses appended to the original filename. Rating `-1` to `5` will become `+` to `+++++`. 
 
 
 Known Issues
