@@ -84,6 +84,10 @@ cur.executescript('''
 
 	INSERT INTO Media SELECT id, filename, timestamp, rating, event_id FROM PhotoTable;
 	INSERT INTO Media SELECT id, filename, timestamp, rating, event_id FROM VideoTable;
+
+	INSERT INTO Media SELECT pt.id, bpt.filepath AS filename, pt.timestamp, pt.rating, pt.event_id FROM PhotoTable pt
+	JOIN BackingPhotoTable bpt ON pt.develop_camera_id = bpt.id;
+
 	CREATE INDEX MediaEventIDIndex ON Media (event_id);
 ''')
 
