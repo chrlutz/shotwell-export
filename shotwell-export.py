@@ -28,6 +28,7 @@ import shutil
 import sqlite3
 import datetime
 import argparse
+from tqdm import tqdm
 
 haveEXIF = False
 try:
@@ -103,7 +104,8 @@ cur.execute('''
 	LEFT JOIN EventTable ON EventTable.id = event_id
 ''')
 
-for row in cur:
+print("Querying images...")
+for row in tqdm(list(cur)):
 	try:
 		sourceFile = row['filename']
 		if args.replace:
@@ -140,8 +142,8 @@ for row in cur:
 			if not os.path.exists(targetDir):
 				os.makedirs(targetDir)
 
-			print(targetFile)
 			if not os.path.exists(targetFile):
+				print("Adding file " + targetFile)
 				if args.move:
 					shutil.move(sourceFile, targetFile)
 				else:
