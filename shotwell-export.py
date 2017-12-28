@@ -129,7 +129,7 @@ for row in cur:
 				file=filename.encode('utf-8')
 			))
 		else:
-			targetFile = os.path.join(args.output_dir, filename.encode('utf-8'))
+			continue
 	
 		targetFile = targetFile.replace('/ ', '/').replace(' /', '/')
 		targetDir = os.path.dirname(targetFile)
