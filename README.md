@@ -1,6 +1,10 @@
 Shotwell Export
 ===============
 
+This is a fork of [original script made by Robert Koehler](https://bitbucket.org/robertkoehler/shotwell-export). I've made a super small change, that for the Shotwell events, that does not have their own name defined, files end in the base folder, instead of in a separate folder. That way You can have named folders for the important stuff and all not so important photos will end up in the base extraction folder
+
+Following is direct copy from original with few changes: 
+
 Shotwell Export is a small tool for exporting your whole [Shotwell][1] photo library to a simple but still intuitive file structure.
 
 By default, it will generate a file structure similiar to:
@@ -20,7 +24,7 @@ Getting Started
 
 Currently, the easiest way is to download the file directly from bitbucket.org:
 
-    sudo wget -O /usr/bin/shotwell-export https://bitbucket.org/robertkoehler/shotwell-export/raw/tip/shotwell-export.py
+    sudo wget -O /usr/bin/shotwell-export https://raw.githubusercontent.com/emil-genov/shotwell-export/master/shotwell-export.py
     sudo chmod a+x /usr/bin/shotwell-export
 
 If you want better date support, download this EXIF library. This is optional.

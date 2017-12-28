@@ -120,14 +120,16 @@ for row in cur:
 		if args.stars and row['rating'] > 0:
 			filename, extension = os.path.splitext(filename)
 			filename = filename + u' ' + (u'+' * row['rating']) + extension
-		
-		targetFile = os.path.join(args.output_dir, args.filename.format(
-			y='%04d' % date.year,
-			m='%02d' % date.month,
-			d='%02d' % date.day,
-			event=row['eventName'].encode('utf-8') if row['eventName'] else '',
-			file=filename.encode('utf-8')
-		))
+		if row['eventName']:		
+			targetFile = os.path.join(args.output_dir, args.filename.format(
+				y='%04d' % date.year,
+				m='%02d' % date.month,
+				d='%02d' % date.day,
+				event=row['eventName'].encode('utf-8') if row['eventName'] else '',
+				file=filename.encode('utf-8')
+			))
+		else:
+			targetFile = os.path.join(args.output_dir, filename.encode('utf-8'))
 	
 		targetFile = targetFile.replace('/ ', '/').replace(' /', '/')
 		targetDir = os.path.dirname(targetFile)
