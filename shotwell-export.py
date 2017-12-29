@@ -102,6 +102,7 @@ cur.execute('''
 	FROM 
 		Media
 	LEFT JOIN EventTable ON EventTable.id = event_id
+        ORDER BY EventTable.id
 ''')
 
 print("Querying images...")
