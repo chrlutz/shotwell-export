@@ -150,6 +150,7 @@ for row in tqdm(list(cur)):
 					print("Moving file to " + targetFile)
 					shutil.move(sourceFile, targetFile)
 				elif args.symlink:
+					sourceFile=os.path.relpath(sourceFile, os.path.dirname(targetFile))
 					os.symlink(sourceFile, targetFile)
 				else:
 					print("Copying file to " + targetFile)
