@@ -145,12 +145,13 @@ for row in tqdm(list(cur)):
 				os.makedirs(targetDir)
 
 			if not os.path.exists(targetFile):
-				print("Adding file " + targetFile)
 				if args.move:
+					print("Moving file to " + targetFile)
 					shutil.move(sourceFile, targetFile)
 				elif args.symlink:
 					os.symlink(sourceFile, targetFile)
 				else:
+					print("Copying file to " + targetFile)
 					shutil.copy2(sourceFile, targetFile)
 	except Exception as e:
 		sys.stderr.write(u'ERROR: Could not handle file\r\n')
