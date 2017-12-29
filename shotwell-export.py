@@ -62,6 +62,7 @@ parser.add_argument('-d', '--db', default='~/.local/share/shotwell/data/photo.db
 parser.add_argument('-o', '--output-dir', default='shotwell-export', metavar='DIR', help='output location, defaults to shotwell-export')
 parser.add_argument('-n', '--filename', default='{y}/{y}-{m}-{d} {event}/{file}', metavar='PATTERN', help='template for file path, defaults to {y}/{y}-{m}-{d} {event}/{file}')
 parser.add_argument('-m', '--move', action='store_true', help='move files instead of copying. CONSIDER A BACKUP')
+parser.add_argument('-l', '--symlink', action='store_true', help='create symlinks instead of copying.')
 parser.add_argument('-s', '--stars', action='store_true', help='add ratings: IMG_1234 +++.JPG')
 parser.add_argument('-r', '--replace', nargs=2, metavar=('SEARCH', 'REPLACE'), help='replace source path parts, try --replace /media/OldDrive/ /media/NewDrive/')
 
@@ -147,6 +148,8 @@ for row in tqdm(list(cur)):
 				print("Adding file " + targetFile)
 				if args.move:
 					shutil.move(sourceFile, targetFile)
+				elif args.symlink:
+					os.symlink(sourceFile, targetFile)
 				else:
 					shutil.copy2(sourceFile, targetFile)
 	except Exception as e:
