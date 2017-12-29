@@ -6,6 +6,7 @@
 This file is part of shotwell-export.
 
 Copyright 2013 Robert Koehler <robert.koehler@ee39.de>
+Modifications 2017 by Christoph Lutz <chrlutz@gmail.com>
 
 shotwell-export is free software: you can redistribute it and/or modify it 
 under the terms of the GNU General Public License as published by the Free

@@ -1,7 +1,7 @@
 Shotwell Export
 ===============
 
-This is a fork of [original script made by Robert Koehler](https://bitbucket.org/robertkoehler/shotwell-export). I've made a super small change, that for the Shotwell events, that does not have their own name defined, files end in the base folder, instead of in a separate folder. That way You can have named folders for the important stuff and all not so important photos will end up in the base extraction folder
+This is a fork of [original script made by Robert Koehler](https://bitbucket.org/robertkoehler/shotwell-export) that I did improve for my purposes (see changelog). The most interesting feature could for example be a symlink output support (which means we get a view of shotwell's event structure in form of symlinks pointing to the origin targets).
 
 Following is direct copy from original with few changes: 
 
