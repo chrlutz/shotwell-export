@@ -30,63 +30,72 @@ import datetime
 import argparse
 from tqdm import tqdm
 
-reload(sys)
-sys.setdefaultencoding('utf-8')
+def main():
+	reload(sys)
+	sys.setdefaultencoding('utf-8')
 
-parser = argparse.ArgumentParser(
-	description='Imports events from a directory structure (that contains event information) into the Shotwell DB.')
-parser.add_argument('-d', '--db', default='~/.local/share/shotwell/data/photo.db', help='location of photo.db, defaults to local user\'s')
-parser.add_argument('-n', '--filename', default='{y}/{y}-{m}-{d} {event}/{file}', metavar='PATTERN', help='template for file path, defaults to {y}/{y}-{m}-{d} {event}/{file}')
-args = parser.parse_args()
+	parser = argparse.ArgumentParser(
+		description='Imports events from a directory structure (that contains event information) into the Shotwell DB.')
+	parser.add_argument('-d', '--db', default='~/.local/share/shotwell/data/photo.db', help='location of photo.db, defaults to local user\'s')
+	parser.add_argument('-n', '--filename', default='{y}/{y}-{m}-{d} {event}/{file}', metavar='PATTERN', help='template for file path, defaults to {y}/{y}-{m}-{d} {event}/{file}')
+	args = parser.parse_args()
 
-if not os.path.exists(args.db):
-	sys.stderr.write('could not find photo.db. Check option --db.\r\n')
-	sys.exit()
+	if not os.path.exists(args.db):
+		sys.stderr.write('could not find photo.db. Check option --db.\r\n')
+		sys.exit()
 
-db = sqlite3.connect(args.db)
-db.row_factory = sqlite3.Row
-cur = db.cursor()
+	db = sqlite3.connect(args.db)
+	db.row_factory = sqlite3.Row
+	cur = db.cursor()
 
-pattern = args.filename.replace("/", "\/")
-pattern = pattern.format(
-	y = "\d{4}",
-        m = "\d{2}",
-        d = "\d{2}",
-        event = "([^/]*(\/[^/]*)*)",
-        file = "[^/]*"
-)
-pattern = "^.*\/" + pattern + "$"
-print(pattern)
-pattern = re.compile(pattern, re.UNICODE)
+	pattern	= args.filename.replace("/", "\/")
+	pattern = pattern.format(
+		y = "\d{4}",
+		m = "\d{2}",
+		d = "\d{2}",
+		event = "([^/]*(\/[^/]*)*)",
+		file = "[^/]*"
+	)
+	pattern = "^.*\/" + pattern + "$"
+	print(pattern)
+	pattern = re.compile(pattern, re.UNICODE)
 
-mapPathToEventId = {}
+	mapPathToEventId = {}
 
-cur.execute('''SELECT id, filename from PhotoTable ORDER BY filename''')
-for row in tqdm(list(cur)):
-	try:
-		filename = row['filename']
-		result = pattern.match(filename)
-		if result:
-			event = result.groups()[0]
-			event = event.replace("_", " ")
-			event = event.replace("/", " - ")
+	addEventsAndUpdateTable(pattern, "PhotoTable", cur, mapPathToEventId)
 
-			path = os.path.dirname(filename)
-			eventId = mapPathToEventId.get(path)
-			if not eventId:
-				cur.execute('''INSERT into EventTable(name) VALUES(?)''', [event])
-				eventId = cur.lastrowid
-				print("added event {}: {} --> {}".format(eventId, path, event))
-				mapPathToEventId[path] = eventId
+	db.commit()
 
-			cur.execute('''UPDATE PhotoTable SET event_id = {} WHERE id = {}'''.format(eventId, row['id']))
-			print("updated event_id {}, {}".format(eventId, filename))
 
-		elif filename.startswith('/home/clutz/pics/20'):
-			print("no match: {}".format(filename))
+def addEventsAndUpdateTable(pattern, table, cur, mapPathToEventId):
+	cur.execute('''SELECT id, filename from {} ORDER BY filename'''.format(table))
+	for row in tqdm(list(cur)):
+		try:
+			filename = row['filename']
+			result = pattern.match(filename)
+			if result:
+				event = result.groups()[0]
+				event = event.replace("_", " ")
+				event = event.replace("/", " - ")
+	
+				path = os.path.dirname(filename)
+				eventId = mapPathToEventId.get(path)
+				if not eventId:
+					cur.execute('''INSERT into EventTable(name) VALUES(?)''', [event])
+					eventId = cur.lastrowid
+					print("added event {}: {} --> {}".format(eventId, path, event))
+					mapPathToEventId[path] = eventId
+
+				cur.execute('''UPDATE {} SET event_id = {} WHERE id = {}'''.format(table, eventId, row['id']))
+				print("updated event_id {}, {}".format(eventId, filename))
+
+			elif filename.startswith('/home/clutz/pics/20'):
+				print("no match: {}".format(filename))
 		
-	except Exception as e:
-		sys.stderr.write(u'ERROR: Could not handle file {}\n'.format(row['filename']))
-		raise e	
+		except Exception as e:
+			sys.stderr.write(u'ERROR: Could not handle file {}\n'.format(row['filename']))
+			raise e	
 
-db.commit()
+
+if __name__ == "__main__":
+    main()
