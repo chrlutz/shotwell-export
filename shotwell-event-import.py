@@ -59,6 +59,8 @@ pattern = "^.*\/" + pattern + "$"
 print(pattern)
 pattern = re.compile(pattern, re.UNICODE)
 
+mapPathToEventId = {}
+
 cur.execute('''SELECT id, filename from PhotoTable ORDER BY filename''')
 for row in tqdm(list(cur)):
 	try:
@@ -68,10 +70,23 @@ for row in tqdm(list(cur)):
 			event = result.groups()[0]
 			event = event.replace("_", " ")
 			event = event.replace("/", " - ")
-			print("match {}, {}".format(filename, event))
+
+			path = os.path.dirname(filename)
+			eventId = mapPathToEventId.get(path)
+			if not eventId:
+				cur.execute('''INSERT into EventTable(name) VALUES(?)''', [event])
+				eventId = cur.lastrowid
+				print("added event {}: {} --> {}".format(eventId, path, event))
+				mapPathToEventId[path] = eventId
+
+			cur.execute('''UPDATE PhotoTable SET event_id = {} WHERE id = {}'''.format(eventId, row['id']))
+			print("updated event_id {}, {}".format(eventId, filename))
+
 		elif filename.startswith('/home/clutz/pics/20'):
 			print("no match: {}".format(filename))
 		
 	except Exception as e:
 		sys.stderr.write(u'ERROR: Could not handle file {}\n'.format(row['filename']))
 		raise e	
+
+db.commit()
