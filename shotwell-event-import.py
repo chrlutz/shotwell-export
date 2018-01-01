@@ -38,6 +38,7 @@ def main():
 		description='Imports events from a directory structure (that contains event information) into the Shotwell DB.')
 	parser.add_argument('-d', '--db', default='~/.local/share/shotwell/data/photo.db', help='location of photo.db, defaults to local user\'s')
 	parser.add_argument('-n', '--filename', default='{y}/{y}-{m}-{d} {event}/{file}', metavar='PATTERN', help='template for file path, defaults to {y}/{y}-{m}-{d} {event}/{file}')
+	parser.add_argument('-u', '--print-unmatched', default='', help='print files in the specified folder that are not matched by the --filename pattern')
 	args = parser.parse_args()
 
 	if not os.path.exists(args.db):
@@ -62,12 +63,13 @@ def main():
 
 	mapPathToEventId = {}
 
-	addEventsAndUpdateTable(pattern, "PhotoTable", cur, mapPathToEventId)
+	addEventsAndUpdateTable(pattern, "PhotoTable", cur, mapPathToEventId, args.print_unmatched)
+	addEventsAndUpdateTable(pattern, "VideoTable", cur, mapPathToEventId, args.print_unmatched)
 
 	db.commit()
 
 
-def addEventsAndUpdateTable(pattern, table, cur, mapPathToEventId):
+def addEventsAndUpdateTable(pattern, table, cur, mapPathToEventId, print_unmatched):
 	cur.execute('''SELECT id, filename from {} ORDER BY filename'''.format(table))
 	for row in tqdm(list(cur)):
 		try:
@@ -89,7 +91,7 @@ def addEventsAndUpdateTable(pattern, table, cur, mapPathToEventId):
 				cur.execute('''UPDATE {} SET event_id = {} WHERE id = {}'''.format(table, eventId, row['id']))
 				print("updated event_id {}, {}".format(eventId, filename))
 
-			elif filename.startswith('/home/clutz/pics/20'):
+			elif len(print_unmatched) > 0 and filename.startswith(print_unmatched):
 				print("no match: {}".format(filename))
 		
 		except Exception as e:
