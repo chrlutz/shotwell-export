@@ -69,11 +69,12 @@ parser.add_argument('-r', '--replace', nargs=2, metavar=('SEARCH', 'REPLACE'), h
 
 args = parser.parse_args()
 
-if not os.path.exists(args.db):
-	sys.stderr.write('could not find photo.db. Check option --db.\r\n')
+dbfile = os.path.expanduser(args.db)
+if not os.path.exists(dbfile):
+	sys.stderr.write('could not find {}. Check option --db.\r\n'.format(dbfile))
 	sys.exit()
 
-db = sqlite3.connect(args.db)
+db = sqlite3.connect(dbfile)
 db.row_factory = sqlite3.Row
 cur = db.cursor()
 cur.executescript('''
