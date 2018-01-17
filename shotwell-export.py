@@ -82,14 +82,15 @@ cur.executescript('''
 		id INTEGER,
 		filename TEXT,
 		timestamp INTEGER,
+		exposure_time INTEGER,
 		rating INTERGER,
 		event_id INTEGER
 	);
 
-	INSERT INTO Media SELECT id, filename, timestamp, rating, event_id FROM PhotoTable;
-	INSERT INTO Media SELECT id, filename, timestamp, rating, event_id FROM VideoTable;
+	INSERT INTO Media SELECT id, filename, timestamp, exposure_time, rating, event_id FROM PhotoTable;
+	INSERT INTO Media SELECT id, filename, timestamp, exposure_time, rating, event_id FROM VideoTable;
 
-	INSERT INTO Media SELECT pt.id, bpt.filepath AS filename, pt.timestamp, pt.rating, pt.event_id FROM PhotoTable pt
+	INSERT INTO Media SELECT pt.id, bpt.filepath AS filename, pt.timestamp, pt.exposure_time, pt.rating, pt.event_id FROM PhotoTable pt
 	JOIN BackingPhotoTable bpt ON pt.develop_camera_id = bpt.id;
 
 	CREATE INDEX MediaEventIDIndex ON Media (event_id);
@@ -101,7 +102,8 @@ cur.execute('''
 		timestamp,
 		rating,
 		EventTable.name AS eventName, 
-		(SELECT MIN(timestamp) FROM Media WHERE event_id = EventTable.id AND event_id != -1) AS eventTime 
+		(SELECT MIN(timestamp) FROM Media WHERE event_id = EventTable.id AND event_id != -1) AS eventTime,
+		(SELECT MIN(exposure_time) FROM Media WHERE event_id = EventTable.id AND event_id != -1) AS exposureTime
 	FROM 
 		Media
 	LEFT JOIN EventTable ON EventTable.id = event_id
@@ -111,27 +113,29 @@ cur.execute('''
 print("Querying images...")
 for row in tqdm(list(cur)):
 	try:
-		sourceFile = row['filename']
+		(sourceFile, timestamp, rating, eventName, eventTime, exposureTime) = row
 		if args.replace:
 			sourceFile = sourceFile.replace(args.replace[0], args.replace[1])
 	
-		if row['eventTime']:
-			date = datetime.datetime.fromtimestamp(row['eventTime'])
+		if exposureTime:
+			date = datetime.datetime.fromtimestamp(exposureTime)
+		elif eventTime:
+			date = datetime.datetime.fromtimestamp(eventTime)
 		else:
 			date = getEXIFDate(sourceFile)
 			if not date:
-				date = datetime.datetime.fromtimestamp(row['timestamp'])
+				date = datetime.datetime.fromtimestamp(timestamp)
 	
-		filename = os.path.basename(row['filename'])
-		if args.stars and row['rating'] > 0:
+		filename = os.path.basename(sourceFile)
+		if args.stars and rating > 0:
 			filename, extension = os.path.splitext(filename)
-			filename = filename + u' ' + (u'+' * row['rating']) + extension
-		if row['eventName']:		
+			filename = filename + u' ' + (u'+' * rating) + extension
+		if eventName:
 			targetFile = os.path.join(args.output_dir, args.filename.format(
 				y='%04d' % date.year,
 				m='%02d' % date.month,
 				d='%02d' % date.day,
-				event=row['eventName'].encode('utf-8') if row['eventName'] else '',
+				event=eventName.encode('utf-8') if eventName else '',
 				file=filename.encode('utf-8')
 			))
 		else:
@@ -151,6 +155,7 @@ for row in tqdm(list(cur)):
 					print("Moving file to " + targetFile)
 					shutil.move(sourceFile, targetFile)
 				elif args.symlink:
+					#print("Linking file to " + targetFile)
 					sourceFile=os.path.relpath(sourceFile, os.path.dirname(targetFile))
 					os.symlink(sourceFile, targetFile)
 				else:
@@ -158,6 +163,6 @@ for row in tqdm(list(cur)):
 					shutil.copy2(sourceFile, targetFile)
 	except Exception as e:
 		sys.stderr.write(u'ERROR: Could not handle file\r\n')
-		sys.stderr.write(u'(filename=%(filename)s, timestamp=%(timestamp)s, rating=%(rating)s, eventName=%(eventName)s, eventTime=%(eventTime)s)\r\n' % dict(zip(row.keys(), row)));
+		sys.stderr.write(u'(filename=%(filename)s, timestamp=%(timestamp)s, exposureTime=%(exposureTime)s, rating=%(rating)s, eventName=%(eventName)s, eventTime=%(eventTime)s)\r\n' % dict(zip(row.keys(), row)));
 		raise e	
 
